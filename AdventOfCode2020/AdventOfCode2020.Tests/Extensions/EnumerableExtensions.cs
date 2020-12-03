@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace AdventOfCode2020.Tests.Extensions
@@ -53,5 +54,7 @@ namespace AdventOfCode2020.Tests.Extensions
 				yield return combination;
 			}
 		}
+
+		public static Size GetSize<T>(this T[,] array) => new(array.GetLength(0), array.GetLength(1));
 	}
 }

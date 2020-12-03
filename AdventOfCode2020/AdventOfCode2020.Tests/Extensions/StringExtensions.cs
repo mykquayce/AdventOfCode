@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace AdventOfCode2020.Tests.Extensions
 {
@@ -20,6 +21,12 @@ namespace AdventOfCode2020.Tests.Extensions
 				var value = parser(line);
 				yield return value;
 			}
+		}
+
+		public static Task<string> ReadAllTextAsync(this string filename)
+		{
+			var path = Path.Combine(".", "Data", filename);
+			return File.ReadAllTextAsync(path);
 		}
 	}
 }

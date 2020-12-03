@@ -61,5 +61,16 @@ namespace AdventOfCode2020.Tests.Extensions.Tests
 			var actual = before.PadEnd(6, 0);
 			Assert.Equal(new[] { 1, 2, 3, 0, 0, 0, }, actual);
 		}
+
+		[Theory]
+		[InlineData(5, 4)]
+		[InlineData(4, 5)]
+		public void GetSize(int width, int height)
+		{
+			var array = new bool[width, height];
+			var size = array.GetSize();
+			Assert.Equal(width, size.Width);
+			Assert.Equal(height, size.Height);
+		}
 	}
 }
