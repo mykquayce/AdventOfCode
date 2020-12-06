@@ -56,5 +56,12 @@ namespace AdventOfCode2020.Tests.Extensions
 		}
 
 		public static Size GetSize<T>(this T[,] array) => new(array.GetLength(0), array.GetLength(1));
+
+		public static IEnumerable<T> Dedupe<T>(this IEnumerable<T> collection)
+		{
+			return from i in collection
+				   group i by i into gg
+				   select gg.Key;
+		}
 	}
 }

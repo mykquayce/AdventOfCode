@@ -72,5 +72,13 @@ namespace AdventOfCode2020.Tests.Extensions.Tests
 			Assert.Equal(width, size.Width);
 			Assert.Equal(height, size.Height);
 		}
+
+		[Theory]
+		[InlineData("abcxabcyabcz", "abcxyz")]
+		public void Dedupe(string s, string expected)
+		{
+			var actual = new string(s.Dedupe().ToArray());
+			Assert.Equal(expected, actual);
+		}
 	}
 }
