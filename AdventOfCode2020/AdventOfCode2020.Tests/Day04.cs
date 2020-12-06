@@ -150,9 +150,6 @@ eyr:2022", true)]
 			var count = 0;
 			var passportsStrings = filename.ReadGroupsAsync();
 
-			await using var stream = File.OpenWrite("debug.txt");
-			using var writer = new StreamWriter(stream);
-
 			await foreach (var passportString in passportsStrings)
 			{
 				var passport = Passport.Parse(passportString);
@@ -161,8 +158,6 @@ eyr:2022", true)]
 				{
 					var before = passport[Passport.Fields.hgt];
 					var after = passport.HeightCm + " " + passport.HeightIn;
-
-					await writer.WriteLineAsync($"{before} : {after}");
 					count++;
 				}
 			}
