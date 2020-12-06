@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace AdventOfCode2020.Tests.Extensions
@@ -27,6 +28,31 @@ namespace AdventOfCode2020.Tests.Extensions
 		{
 			var path = Path.Combine(".", "Data", filename);
 			return File.ReadAllTextAsync(path);
+		}
+
+		public async static IAsyncEnumerable<string> ReadGroupsAsync(this string filename)
+		{
+			var path = Path.Combine(".", "Data", filename);
+
+			using var reader = new StreamReader(path, Encoding.UTF8);
+
+			string? line;
+			var lines = new List<string>();
+
+			do
+			{
+				line = await reader.ReadLineAsync();
+
+				if (string.IsNullOrWhiteSpace(line))
+				{
+					yield return string.Join(Environment.NewLine, lines);
+					lines.Clear();
+				}
+				else
+				{
+					lines.Add(line);
+				}
+			} while (line is not null);
 		}
 	}
 }

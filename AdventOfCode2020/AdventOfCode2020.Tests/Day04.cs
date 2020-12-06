@@ -1,7 +1,6 @@
 using AdventOfCode2020.Tests.Extensions;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -81,14 +80,12 @@ iyr:2011 ecl:brn hgt:59in", 4)]
 		[InlineData("day04.txt", 260)]
 		public async Task CountPassportFromFile(string filename, int expected)
 		{
-			var text = await filename.ReadAllTextAsync();
+			var count = 0;
+			var passports = filename.ReadGroupsAsync();
 
-			var passports = text.Split(separator: Environment.NewLine + Environment.NewLine);
-
-			Assert.Equal(expected, passports.Length);
-
-			foreach (var passport in passports)
+			await foreach (var passport in passports)
 			{
+				count++;
 				var fields = passport.Split(new[] { " ", Environment.NewLine }, count: int.MaxValue, options: StringSplitOptions.RemoveEmptyEntries);
 
 				Assert.NotNull(fields);
@@ -98,6 +95,8 @@ iyr:2011 ecl:brn hgt:59in", 4)]
 
 				Assert.All(fields, s => Assert.Matches(@"[a-z]{3}:[#\w]+", s));
 			}
+
+			Assert.Equal(expected, count);
 		}
 
 		[Theory]
@@ -105,11 +104,9 @@ iyr:2011 ecl:brn hgt:59in", 4)]
 		public async Task Part1(string filename, int expected)
 		{
 			var count = 0;
-			var text = await filename.ReadAllTextAsync();
+			var passportsStrings = filename.ReadGroupsAsync();
 
-			var passportsStrings = text.Split(separator: Environment.NewLine + Environment.NewLine);
-
-			foreach (var passportString in passportsStrings)
+			await foreach (var passportString in passportsStrings)
 			{
 				var passport = Passport.Parse(passportString);
 
@@ -151,14 +148,12 @@ eyr:2022", true)]
 		public async Task Part2(string filename, int expected)
 		{
 			var count = 0;
-			var text = await filename.ReadAllTextAsync();
-
-			var passportsStrings = text.Split(separator: Environment.NewLine + Environment.NewLine);
+			var passportsStrings = filename.ReadGroupsAsync();
 
 			await using var stream = File.OpenWrite("debug.txt");
 			using var writer = new StreamWriter(stream);
 
-			foreach (var passportString in passportsStrings)
+			await foreach (var passportString in passportsStrings)
 			{
 				var passport = Passport.Parse(passportString);
 

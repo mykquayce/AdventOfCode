@@ -88,13 +88,17 @@ b", 11)]
 		[InlineData("day06.txt", 471)]
 		public async Task GroupsCheck(string filename, int expected)
 		{
-			var text = await filename.ReadAllTextAsync();
-			var groups = GetGroups(text).ToList();
-			Assert.NotNull(groups);
-			Assert.NotEmpty(groups);
-			Assert.Equal(expected, groups.Count);
-			Assert.DoesNotContain(default, groups);
-			Assert.DoesNotContain(string.Empty, groups);
+			var count = 0;
+			var groups = GetGroupsFromFileAsync(filename);
+
+			await foreach (var group in groups)
+			{
+				count++;
+				Assert.NotNull(group);
+				Assert.NotEmpty(group);
+			}
+
+			Assert.Equal(expected, count);
 		}
 
 		[Theory]
@@ -102,9 +106,8 @@ b", 11)]
 		public async Task Part1(string filename, int expected)
 		{
 			var count = 0;
-			var text = await filename.ReadAllTextAsync();
 
-			foreach (var group in GetGroups(text))
+			await foreach (var group in GetGroupsFromFileAsync(filename))
 			{
 				var people = GetPeople(group);
 				var answers = GetDedupedAnswers(people);
@@ -168,11 +171,10 @@ b", 6)]
 		[InlineData("day06.txt", 3_052)]
 		public async Task Part2(string filename, int expected)
 		{
-			var text = await filename.ReadAllTextAsync();
 			var count = 0;
-			var groups = GetGroups(text);
+			var groups = GetGroupsFromFileAsync(filename);
 
-			foreach (var group in groups)
+			await foreach (var group in groups)
 			{
 				var people = GetPeople(group).ToList();
 				var answers = GetProperDedupedAnswers(people);
@@ -219,9 +221,8 @@ kegchuidstwnm
 nzhlj")]
 		public async Task CheckLastGroup(string filename, string expected)
 		{
-			var text = await filename.ReadAllTextAsync();
-			var groups = GetGroups(text);
-			var last = groups.Last();
+			var groups = GetGroupsFromFileAsync(filename);
+			var last = await groups.LastAsync();
 			Assert.Equal(expected, last);
 		}
 
@@ -243,5 +244,6 @@ nzhlj")]
 
 			return query;
 		}
+		private static IAsyncEnumerable<string> GetGroupsFromFileAsync(string filename) => filename.ReadGroupsAsync();
 	}
 }
