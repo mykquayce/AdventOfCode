@@ -63,5 +63,17 @@ namespace AdventOfCode2020.Tests.Extensions
 				   group i by i into gg
 				   select gg.Key;
 		}
+
+		public static IEnumerable<T> ToEnumerable<T>(this IDictionary<int, T> dictionary, T @default)
+		{
+			var max = dictionary.Keys.Max();
+
+			for (var a = 0; a <= max; a++)
+			{
+				yield return dictionary.ContainsKey(a)
+					? dictionary[a]
+					: @default;
+			}
+		}
 	}
 }
