@@ -13,6 +13,14 @@ namespace AdventOfCode2020.Tests.Extensions
 			return ints.Aggregate(seed, accumulator);
 		}
 
+		public static long Product(this IEnumerable<long> longs)
+		{
+			const long seed = 1;
+			static long accumulator(long product, long next) => product * next;
+
+			return longs.Aggregate(seed, accumulator);
+		}
+
 		public static IEnumerable<int> ToModulos(this int value, int radix = 10)
 		{
 			do

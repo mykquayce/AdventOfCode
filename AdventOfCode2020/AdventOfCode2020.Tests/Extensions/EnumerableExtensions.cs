@@ -79,5 +79,7 @@ namespace AdventOfCode2020.Tests.Extensions
 		public static IEnumerable<KeyValuePair<int, T>> ToKeyValuePairs<T>(this IEnumerable<T> collection) => collection.Select((item, index) => new KeyValuePair<int, T>(index, item));
 		public static IDictionary<int, T> ToDictionary<T>(this IEnumerable<T> collection) => new Dictionary<int, T>(collection.ToKeyValuePairs());
 		public static IEnumerable<TValue> GetValues<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> collection) => collection.Select(kvp => kvp.Value);
+		public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> collection) where TKey : notnull
+			=> collection.ToDictionary(t => t.Item1, t => t.Item2);
 	}
 }
