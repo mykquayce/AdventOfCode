@@ -21,6 +21,14 @@ namespace AdventOfCode2020.Tests.Extensions
 			return longs.Aggregate(seed, accumulator);
 		}
 
+		public static ulong Sum(this IEnumerable<ulong> ulongs)
+		{
+			const ulong seed = 0;
+			static ulong accumulator(ulong product, ulong next) => product + next;
+
+			return ulongs.Aggregate(seed, accumulator);
+		}
+
 		public static IEnumerable<int> ToModulos(this int value, int radix = 10)
 		{
 			do
