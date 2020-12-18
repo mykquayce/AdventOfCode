@@ -81,5 +81,25 @@ namespace AdventOfCode2020.Tests.Extensions
 		public static IEnumerable<TValue> GetValues<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> collection) => collection.Select(kvp => kvp.Value);
 		public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> collection) where TKey : notnull
 			=> collection.ToDictionary(t => t.Item1, t => t.Item2);
+
+		public static IEnumerable<IList<T>> GetCombinations<T>(this IList<T> first, IList<T> second)
+		{
+			var count = first.Count;
+
+			for (var a = 0; a < Math.Pow(2, count); a++)
+			{
+				var result = new T[count];
+
+				var binary = Convert.ToString(a, toBase: 2)
+					.PadLeft(totalWidth: count, paddingChar: '0');
+
+				for (var b = 0; b < binary.Length; b++)
+				{
+					result[b] = binary[b] == '0' ? first[b] : second[b];
+				}
+
+				yield return result;
+			}
+		}
 	}
 }
