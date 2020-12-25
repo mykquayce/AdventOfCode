@@ -82,23 +82,37 @@ namespace AdventOfCode2020.Tests.Extensions
 		public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<(TKey, TValue)> collection) where TKey : notnull
 			=> collection.ToDictionary(t => t.Item1, t => t.Item2);
 
-		public static IEnumerable<IList<T>> GetCombinations<T>(this IList<T> first, IList<T> second)
+		public static IEnumerable<IList<int>> GetIndexCombinations(this IList<int> dimensions)
 		{
-			var count = first.Count;
-
-			for (var a = 0; a < Math.Pow(2, count); a++)
+			for (var a = 0; a < dimensions.Product(); a++)
 			{
-				var result = new T[count];
+				var list = new int[dimensions.Count];
 
-				var binary = Convert.ToString(a, toBase: 2)
-					.PadLeft(totalWidth: count, paddingChar: '0');
-
-				for (var b = 0; b < binary.Length; b++)
+				for (var b = 0; b < dimensions.Count; b++)
 				{
-					result[b] = binary[b] == '0' ? first[b] : second[b];
+					list[b] = (a / dimensions.Take(b).Product()) % dimensions[b];
 				}
 
-				yield return result;
+				yield return list;
+			}
+		}
+
+		public static IEnumerable<IList<T>> GetArraysCombinations<T>(this IList<IList<T>> lists)
+		{
+			var length = lists.Count;
+			var dimensions = lists.Select(s => s.Count).ToList();
+
+			foreach (var indices in dimensions.GetIndexCombinations())
+			{
+				var combination = new T[length];
+
+				for (var a = 0; a < length; a++)
+				{
+					var index = indices[a];
+					combination[a] = lists[a][index];
+				}
+
+				yield return combination;
 			}
 		}
 	}

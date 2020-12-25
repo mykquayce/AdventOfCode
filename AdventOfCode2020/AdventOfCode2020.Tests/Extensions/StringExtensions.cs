@@ -54,5 +54,7 @@ namespace AdventOfCode2020.Tests.Extensions
 				}
 			} while (line is not null);
 		}
+
+		public static ushort ToBinary(this string s) => Convert.ToUInt16(s, fromBase: 2);
 	}
 }

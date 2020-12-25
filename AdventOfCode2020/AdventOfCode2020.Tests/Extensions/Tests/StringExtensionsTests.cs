@@ -46,5 +46,17 @@ nzhlj")]
 			var first = await groups.LastAsync();
 			Assert.Equal(expected, first);
 		}
+
+		[Theory]
+		[InlineData("0", 0)]
+		[InlineData("1", 1)]
+		[InlineData("10", 2)]
+		[InlineData("100", 4)]
+		[InlineData("1000", 8)]
+		public void ToBinary(string input, ushort expected)
+		{
+			var actual = input.ToBinary();
+			Assert.Equal(expected, actual);
+		}
 	}
 }

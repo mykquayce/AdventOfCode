@@ -255,7 +255,9 @@ namespace AdventOfCode2020.Tests
 
 			for (var a = 0; a < mins.Count; a++) { mins[a]--; maxs[a]++; }
 
-			foreach (var coords in mins.GetCombinations(maxs))
+			IList<IList<int>> lists = new[] { mins, maxs, };
+
+			foreach (var coords in lists.GetArraysCombinations())
 			{
 				yield return new HyperCube(coords);
 			}
