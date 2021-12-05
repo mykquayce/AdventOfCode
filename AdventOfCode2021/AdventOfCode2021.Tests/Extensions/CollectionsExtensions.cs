@@ -1,5 +1,6 @@
 using AdventOfCode2021.Tests.Models;
 using System.Collections.Concurrent;
+using System.Drawing;
 
 namespace System.Collections.Generic;
 
@@ -83,19 +84,9 @@ public static class CollectionsExtensions
 
 	public static T[,] To2dArray<T>(this IEnumerable<IEnumerable<T>> itemses)
 	{
-		var outer = new List<List<T>>();
-
-		foreach (var items in itemses)
-		{
-			var inner = new List<T>();
-
-			foreach (var item in items)
-			{
-				inner.Add(item);
-			}
-
-			outer.Add(inner);
-		}
+		var outer = itemses
+			.Select(row => row.ToList())
+			.ToList();
 
 		var length = outer.Count;
 		var width = outer[0].Count;
@@ -148,6 +139,15 @@ public static class CollectionsExtensions
 		return result;
 	}
 
+	public static IEnumerable<T> GetColumn<T>(this T[,] array, int column)
+	{
+		var height = array.GetLength(dimension: 0);
+		for (var row = 0; row < height; row++)
+		{
+			yield return array[row, column];
+		}
+	}
+
 	public static IEnumerable<T> GetRow<T>(this T[,] array, int row)
 	{
 		var width = array.GetLength(dimension: 1);
@@ -168,5 +168,74 @@ public static class CollectionsExtensions
 	{
 		var s = new string(chars.ToArray());
 		return Convert.ToInt32(s, fromBase: 2);
+	}
+
+	public static IEnumerable<KeyValuePair<T, int>> ReverseArray<T>(this IEnumerable<T> items)
+	{
+		var value = 0;
+		using var enumerator = items.GetEnumerator();
+
+		while (enumerator.MoveNext())
+		{
+			var key = enumerator.Current;
+			yield return new(key, value++);
+		}
+	}
+
+	public static IReadOnlyDictionary<T, Point> Reverse2dArrayToDictionary<T>(this IEnumerable<IEnumerable<T>> rows)
+		where T : notnull
+		=> new Dictionary<T, Point>(Reverse2dArray(rows));
+
+	public static IEnumerable<KeyValuePair<T, Point>> Reverse2dArray<T>(this IEnumerable<IEnumerable<T>> rows)
+	{
+		var y = 0;
+		using var outerEnumerator = rows.GetEnumerator();
+		while (outerEnumerator.MoveNext())
+		{
+			var row = outerEnumerator.Current;
+
+			foreach (var (key, x) in ReverseArray(row))
+			{
+				var value = new Point(x, y);
+				yield return new(key, value);
+			}
+			y++;
+		}
+	}
+	public static IEnumerator<(TFirst, TSecond)> GetEnumerator<TFirst, TSecond>(this (IEnumerable<TFirst>, IEnumerable<TSecond>) tuple)
+	{
+		var first = tuple.Item1.GetEnumerator();
+		var second = tuple.Item2.GetEnumerator();
+
+		return new DoubleEnumerator<TFirst, TSecond>(first, second);
+	}
+}
+
+public sealed class DoubleEnumerator<TFirst, TSecond> : IEnumerator<(TFirst, TSecond)>
+{
+	private readonly IEnumerator<TFirst> _first;
+	private readonly IEnumerator<TSecond> _second;
+
+	public DoubleEnumerator(IEnumerator<TFirst> first, IEnumerator<TSecond> second)
+	{
+		_first = first;
+		_second = second;
+	}
+
+	public (TFirst, TSecond) Current => (_first.Current, _second.Current);
+	object IEnumerator.Current => Current;
+
+	public void Dispose()
+	{
+		_first.Dispose();
+		_second.Dispose();
+	}
+
+	public bool MoveNext() => _first.MoveNext() && _second.MoveNext();
+
+	public void Reset()
+	{
+		_first.Reset();
+		_second.Reset();
 	}
 }

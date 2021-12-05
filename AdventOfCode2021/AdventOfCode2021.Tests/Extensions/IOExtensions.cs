@@ -25,4 +25,12 @@ public static class IOExtensions
 			yield return T.Parse(line, CultureInfo.InvariantCulture);
 		}
 	}
+
+	public static async Task<string> ReadFileAsync(this string fileName)
+	{
+		var path = Path.Combine(".", "PuzzleInput", fileName);
+		await using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+		using var reader = new StreamReader(stream);
+		return await reader.ReadToEndAsync();
+	}
 }
