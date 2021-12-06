@@ -209,6 +209,14 @@ public static class CollectionsExtensions
 
 		return new DoubleEnumerator<TFirst, TSecond>(first, second);
 	}
+
+	public static T Sum<T>(this IEnumerable<T> values)
+		where T : INumber<T>
+	{
+		var sum = T.Zero;
+		foreach (var value in values) sum = sum + value;
+		return sum;
+	}
 }
 
 public sealed class DoubleEnumerator<TFirst, TSecond> : IEnumerator<(TFirst, TSecond)>
