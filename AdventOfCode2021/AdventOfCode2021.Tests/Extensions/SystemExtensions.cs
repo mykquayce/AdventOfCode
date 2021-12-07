@@ -16,4 +16,12 @@ public static class SystemExtensions
 				select inner.ToList()
 			   ).ToList();
 	}
+
+	public static T Triangular<T>(this T number)
+		where T : INumber<T>
+	{
+		T sum = T.Zero;
+		for (T a = T.Zero; a <= number; a++) sum += a;
+		return sum;
+	}
 }

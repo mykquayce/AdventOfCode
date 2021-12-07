@@ -214,8 +214,46 @@ public static class CollectionsExtensions
 		where T : INumber<T>
 	{
 		var sum = T.Zero;
-		foreach (var value in values) sum = sum + value;
+		foreach (var value in values) sum += value;
 		return sum;
+	}
+
+	public static IEnumerable<T> MiddleValues<T>(this IEnumerable<T> values)
+	{
+		var ordered = values.OrderBy(i => i).ToList();
+		var mid = ordered.Count / 2;
+		if ((ordered.Count % 2) == 0)
+		{
+			//even
+			yield return ordered[mid - 1];
+			yield return ordered[mid];
+		}
+		else
+		{
+			//odd
+			yield return ordered[mid - 1];
+		}
+	}
+
+	public static T Median<T>(this IEnumerable<T> values)
+		where T : INumber<T>
+	{
+		var ordered = values.OrderBy(i => i).ToList();
+		var middle = ordered.MiddleValues().ToList();
+		var average = middle.Average();
+		return average;
+	}
+
+	public static T Average<T>(this IEnumerable<T> values)
+		where T : INumber<T>
+	{
+		T count = T.Zero, sum = T.Zero;
+		foreach (var value in values)
+		{
+			sum += value;
+			count++;
+		}
+		return sum / count;
 	}
 }
 
