@@ -24,4 +24,9 @@ public static class SystemExtensions
 		for (T a = T.Zero; a <= number; a++) sum += a;
 		return sum;
 	}
+
+	public static string OrderString(this string s) => new(s.OrderBy(c => c).ToArray());
+
+	public static bool Overlaps<T>(this IEnumerable<T> left, IEnumerable<T> right)
+		=> left.All(right.Contains) || right.All(left.Contains);
 }
