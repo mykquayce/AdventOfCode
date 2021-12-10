@@ -255,6 +255,29 @@ public static class CollectionsExtensions
 		}
 		return sum / count;
 	}
+
+	public static IEnumerable<KeyValuePair<int, T>> ToKeyValuePairArray<T>(this IEnumerable<T> collection)
+	{
+		var index = 0;
+		foreach (var item in collection)
+		{
+			yield return new(index++, item);
+		}
+	}
+
+	public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
+		where TKey : notnull
+		=> keyValuePairs.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+	public static Point ToPoint(this IEnumerable<int> values)
+	{
+		var enumerated = values.Take(2).ToList();
+		return new(x: enumerated[0], y: enumerated[1]);
+	}
+
+	public static T Product<T>(this IEnumerable<T> items)
+		where T : INumber<T>
+		=> items.Aggregate(seed: T.One, (product, next) => product * next);
 }
 
 public sealed class DoubleEnumerator<TFirst, TSecond> : IEnumerator<(TFirst, TSecond)>
