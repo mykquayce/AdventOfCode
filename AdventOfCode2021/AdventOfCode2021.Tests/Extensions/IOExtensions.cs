@@ -33,4 +33,11 @@ public static class IOExtensions
 		using var reader = new StreamReader(stream);
 		return await reader.ReadToEndAsync();
 	}
+
+	public static async Task<T> ReadAndParseFileAsync<T>(this string fileName, IFormatProvider? provider = default)
+		where T : IParseable<T>
+	{
+		var contents = await ReadFileAsync(fileName);
+		return T.Parse(contents, provider);
+	}
 }
