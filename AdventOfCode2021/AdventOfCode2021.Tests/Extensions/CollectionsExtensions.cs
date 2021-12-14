@@ -269,6 +269,14 @@ public static class CollectionsExtensions
 		where TKey : notnull
 		=> keyValuePairs.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
+	public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<Tuple<TKey, TValue>> tuples)
+		where TKey : notnull
+		=> tuples.ToDictionary(t => t.Item1, t => t.Item2);
+
+	public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<ValueTuple<TKey, TValue>> tuples)
+		where TKey : notnull
+		=> tuples.ToDictionary(t => t.Item1, t => t.Item2);
+
 	public static Point ToPoint(this IEnumerable<int> values)
 	{
 		var enumerated = values.Take(2).ToList();
@@ -278,6 +286,38 @@ public static class CollectionsExtensions
 	public static T Product<T>(this IEnumerable<T> items)
 		where T : INumber<T>
 		=> items.Aggregate(seed: T.One, (product, next) => product * next);
+
+	public static IEnumerable<KeyValuePair<T, int>> Itemized<T>(this IEnumerable<T> items)
+	{
+		var query = from item in items
+					group item by item into gg
+					let key = gg.Key
+					let value = gg.Count()
+					select new KeyValuePair<T, int>(key, value);
+
+		return query;
+	}
+
+	public static IReadOnlyDictionary<TItem, TCount> Itemized<TItem, TCount>(this IEnumerable<TItem> items)
+		where TItem : notnull
+		where TCount : INumber<TCount>
+	{
+		var itemized = new Dictionary<TItem, TCount>();
+
+		foreach (var item in items)
+		{
+			if (itemized.ContainsKey(item))
+			{
+				itemized[item]++;
+			}
+			else
+			{
+				itemized.Add(item, TCount.Zero);
+			}
+		}
+
+		return itemized;
+	}
 }
 
 public sealed class DoubleEnumerator<TFirst, TSecond> : IEnumerator<(TFirst, TSecond)>
