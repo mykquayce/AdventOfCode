@@ -1,9 +1,11 @@
 namespace AdventOfCode2022.Tests;
 
-public class Day01
+public class Day01 : Base
 {
 	[Theory]
-	[InlineData(24_000, "1000", "2000", "3000", "", "4000", "", "5000", "6000", "", "7000", "8000", "9000", "", "10000", "")]
+	[InlineData(
+		24_000,
+		"1000", "2000", "3000", "", "4000", "", "5000", "6000", "", "7000", "8000", "9000", "", "10000", "")]
 	public void SolveExample1(int expected, params string[] input)
 	{
 		int most = 0, current = 0;
@@ -29,16 +31,13 @@ public class Day01
 	}
 
 	[Theory]
-	[InlineData(69_310, ".", "Data", "day01.txt")]
-	public async Task SolvePart1(int expected, params string[] paths)
+	[InlineData(69_310)]
+	public async Task SolvePart1(int expected)
 	{
 		var most = 0;
 		{
-			var path = Path.Combine(paths);
-			using var reader = new StreamReader(path);
 			var current = 0;
-			string? line;
-			while ((line = await reader.ReadLineAsync()) is not null)
+			await foreach (var line in Input)
 			{
 				if (string.IsNullOrWhiteSpace(line))
 				{
@@ -60,7 +59,9 @@ public class Day01
 	}
 
 	[Theory]
-	[InlineData(45_000, "1000", "2000", "3000", "", "4000", "", "5000", "6000", "", "7000", "8000", "9000", "", "10000", "")]
+	[InlineData(
+		45_000,
+		"1000", "2000", "3000", "", "4000", "", "5000", "6000", "", "7000", "8000", "9000", "", "10000", "")]
 	public void SolveExample2(int expected, params string[] input)
 	{
 		ICollection<int> totals = new List<int>();
@@ -90,16 +91,13 @@ public class Day01
 	}
 
 	[Theory]
-	[InlineData(206_104, ".", "Data", "day01.txt")]
-	public async Task SolvePart2(int expected, params string[] paths)
+	[InlineData(206_104)]
+	public async Task SolvePart2(int expected)
 	{
 		ICollection<int> totals = new List<int>();
 		{
-			var path = Path.Combine(paths);
-			using var reader = new StreamReader(path);
 			var current = 0;
-			string? line;
-			while ((line = await reader.ReadLineAsync()) is not null)
+			await foreach (var line in Input)
 			{
 				if (string.IsNullOrWhiteSpace(line))
 				{
