@@ -42,4 +42,17 @@ public static class EnumerableExtensions
 
 		return new DoubleEnumerator<TFirst, TSecond>(first, second);
 	}
+
+	public static IEnumerable<T> TakeUpto<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+	{
+		foreach (T element in collection)
+		{
+			yield return element;
+
+			if (predicate(element))
+			{
+				break;
+			}
+		}
+	}
 }
