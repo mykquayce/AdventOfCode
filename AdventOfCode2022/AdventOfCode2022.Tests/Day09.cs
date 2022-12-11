@@ -145,6 +145,7 @@ public class Day09 : Base
 		var actual = rope.TailPositions.Distinct().Count();
 		Assert.Equal(expected, actual);
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 		async static IAsyncEnumerable<char> f(string input)
 		{
 			var move = input[0];
@@ -154,6 +155,7 @@ public class Day09 : Base
 				yield return move;
 			}
 		}
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 	}
 
 	private class Rope

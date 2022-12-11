@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace System.Collections.Generic;
 
 public static class EnumerableExtensions
@@ -55,4 +57,7 @@ public static class EnumerableExtensions
 			}
 		}
 	}
+	public static T Product<T>(this IEnumerable<T> items)
+		where T : INumber<T>
+		=> items.Aggregate(seed: T.One, (product, next) => product * next);
 }
