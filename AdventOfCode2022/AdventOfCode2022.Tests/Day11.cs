@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
 
 namespace AdventOfCode2022.Tests;
 
@@ -44,7 +45,7 @@ Monkey 3:
 	public void ParseInput1(params string[] lines)
 	{
 		var text = string.Join(Environment.NewLine, lines);
-		var monkey = Monkey.Parse(text, default);
+		var monkey = Monkey<int>.Parse(text, default);
 		Assert.NotEqual(default, monkey);
 	}
 
@@ -52,7 +53,7 @@ Monkey 3:
 	[InlineData(_sampleInput)]
 	public void ParseInput2(string text)
 	{
-		var monkeys = Monkeys.Parse(text, default);
+		var monkeys = Monkeys<int>.Parse(text, default);
 		Assert.NotEmpty(monkeys);
 		Assert.All(monkeys.Keys, idx => Assert.InRange(idx, 0, 3));
 		Assert.DoesNotContain(null, monkeys.Values);
@@ -62,7 +63,7 @@ Monkey 3:
 	[InlineData(_sampleInput)]
 	public void PlayTurns(string text)
 	{
-		var monkeys = Monkeys.Parse(text, default);
+		var monkeys = Monkeys<int>.Parse(text, default);
 		Assert.Equal(new[] { 79, 98, }, monkeys[0].Items);
 		Assert.Equal(new[] { 74, }, monkeys[3].Items);
 		monkeys.PlayTurn(monkeyIndex: 0);
@@ -90,7 +91,7 @@ Monkey 3:
 	public void PlayRounds(string text)
 	{
 		// Arrange
-		var monkeys = Monkeys.Parse(text, default);
+		var monkeys = Monkeys<int>.Parse(text, default);
 
 		// Act : round 1
 		monkeys.PlayRound();
@@ -222,7 +223,7 @@ Monkey 3:
 	[InlineData(_sampleInput, 20, 10_605)]
 	public void MonkeyBusiness(string text, int rounds, int expected)
 	{
-		var monkeys = Monkeys.Parse(text, default);
+		var monkeys = Monkeys<int>.Parse(text, default);
 		while (rounds-- > 0)
 		{
 			monkeys.PlayRound();
@@ -237,7 +238,7 @@ Monkey 3:
 	public async Task SolvePart1(int rounds, int expected)
 	{
 		var text = string.Join(Environment.NewLine, await base.GetInputAsync().ToArrayAsync());
-		var monkeys = Monkeys.Parse(text, default);
+		var monkeys = Monkeys<int>.Parse(text, default);
 		while (rounds-- > 0)
 		{
 			monkeys.PlayRound();
@@ -247,8 +248,55 @@ Monkey 3:
 		Assert.Equal(expected, actual);
 	}
 
-	private record class Monkeys(IDictionary<int, Monkey> Dictionary)
-		: IParsable<Monkeys>, IReadOnlyDictionary<int, Monkey>
+	[Theory]
+	[InlineData(_sampleInput)]
+	public void PlayRoundsV2(string text)
+	{
+		// Arrange
+		var monkeys = Monkeys<Int128>.Parse(text, default);
+
+		// Act
+		monkeys.PlayRoundV2();
+
+		// Assert
+		Assert.Equal(2, monkeys[0].InspectionCount);
+		Assert.Equal(4, monkeys[1].InspectionCount);
+		Assert.Equal(3, monkeys[2].InspectionCount);
+		Assert.Equal(6, monkeys[3].InspectionCount);
+
+		// Act
+		var count = 19;
+		while (count-- > 0) { monkeys.PlayRoundV2(); }
+
+		// Assert
+		Assert.Equal(99, monkeys[0].InspectionCount);
+		Assert.Equal(97, monkeys[1].InspectionCount);
+		Assert.Equal(8, monkeys[2].InspectionCount);
+		Assert.Equal(103, monkeys[3].InspectionCount);
+
+		// Act
+		count = 980;
+		while (count-- > 0) { monkeys.PlayRoundV2(); }
+
+		// Assert
+		Assert.Equal(5_204, monkeys[0].InspectionCount);
+		Assert.Equal(4_792, monkeys[1].InspectionCount);
+		Assert.Equal(199, monkeys[2].InspectionCount);
+		Assert.Equal(5_192, monkeys[3].InspectionCount);
+	}
+
+	[Theory]
+	[InlineData(20, 20)]
+	public void LoopTests(int count, int expected)
+	{
+		var actual = 0;
+		while (count-- > 0) { actual++; }
+		Assert.Equal(expected, actual);
+	}
+
+	private record class Monkeys<T>(IDictionary<int, Monkey<T>> Dictionary)
+		: IParsable<Monkeys<T>>, IReadOnlyDictionary<int, Monkey<T>>
+		where T : INumber<T>
 	{
 		public void PlayRound()
 		{
@@ -260,6 +308,16 @@ Monkey 3:
 				}
 			}
 		}
+		public void PlayRoundV2()
+		{
+			foreach (var (idx, monkey) in this)
+			{
+				while (monkey.Items.Any())
+				{
+					PlayTurnV2(idx);
+				}
+			}
+		}
 
 		public void PlayTurn(int monkeyIndex)
 		{
@@ -267,39 +325,51 @@ Monkey 3:
 			var worryLevel = monkey.Items.Dequeue();
 			monkey.InspectionCount++;
 			worryLevel = monkey.Operation(worryLevel);
-			worryLevel /= 3;
-			var destination = (worryLevel % monkey.DivisbleBy) == 0
+			worryLevel /= T.CreateSaturating(3);
+			var destination = (worryLevel % monkey.DivisbleBy) == T.Zero
+				? monkey.TrueRoute
+				: monkey.FalseRoute;
+			this[destination].Items.Enqueue(worryLevel);
+		}
+
+		public void PlayTurnV2(int monkeyIndex)
+		{
+			var monkey = this[monkeyIndex];
+			var worryLevel = monkey.Items.Dequeue();
+			monkey.InspectionCount++;
+			worryLevel = monkey.Operation(worryLevel);
+			var destination = (worryLevel % monkey.DivisbleBy) == T.Zero
 				? monkey.TrueRoute
 				: monkey.FalseRoute;
 			this[destination].Items.Enqueue(worryLevel);
 		}
 
 		#region ireadonlydictionary implementation
-		public Monkey this[int key] => Dictionary[key];
+		public Monkey<T> this[int key] => Dictionary[key];
 		public IEnumerable<int> Keys => Dictionary.Keys;
-		public IEnumerable<Monkey> Values => Dictionary.Values;
+		public IEnumerable<Monkey<T>> Values => Dictionary.Values;
 		public int Count => Dictionary.Count;
 		public bool ContainsKey(int key) => Dictionary.ContainsKey(key);
-		public IEnumerator<KeyValuePair<int, Monkey>> GetEnumerator() => Dictionary.GetEnumerator();
-		public bool TryGetValue(int key, [MaybeNullWhen(false)] out Monkey value) => Dictionary.TryGetValue(key, out value);
+		public IEnumerator<KeyValuePair<int, Monkey<T>>> GetEnumerator() => Dictionary.GetEnumerator();
+		public bool TryGetValue(int key, [MaybeNullWhen(false)] out Monkey<T> value) => Dictionary.TryGetValue(key, out value);
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 		#endregion ireadonlydictionary implementation
 
 		#region iparseable implementation
-		public static Monkeys Parse(string s, IFormatProvider? provider)
+		public static Monkeys<T> Parse(string s, IFormatProvider? provider)
 		{
-			var dictionary = new Dictionary<int, Monkey>();
+			var dictionary = new Dictionary<int, Monkey<T>>();
 
 			foreach (var text in s.Split(Environment.NewLine + Environment.NewLine))
 			{
-				var monkey = Monkey.Parse(text, provider);
+				var monkey = Monkey<T>.Parse(text, provider);
 				dictionary.Add(monkey.Index, monkey);
 			}
 
 			return new(dictionary);
 		}
 
-		public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Monkeys result)
+		public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Monkeys<T> result)
 		{
 			result = Parse(s!, provider);
 			return true;
@@ -307,32 +377,33 @@ Monkey 3:
 		#endregion iparseable implementation
 	}
 
-	private record class Monkey(int Index, Queue<int> Items, Func<int, int> Operation, int DivisbleBy, int TrueRoute, int FalseRoute)
-		: IParsable<Monkey>
+	private record class Monkey<T>(int Index, Queue<T> Items, Func<T, T> Operation, T DivisbleBy, int TrueRoute, int FalseRoute)
+		: IParsable<Monkey<T>>
+		where T : INumber<T>
 	{
 		public int InspectionCount { get; set; }
 
-		public static Monkey Parse(string s, IFormatProvider? provider)
+		public static Monkey<T> Parse(string s, IFormatProvider? provider)
 		{
 			var lines = s.Split(Environment.NewLine);
 
 			var index = int.Parse(lines[0][7..^1]);
-			var startingItems = lines[1][18..].Split(',', StringSplitOptions.TrimEntries).Select(int.Parse);
-			var items = new Queue<int>(startingItems);
-			Func<int, int> operation = lines[2][23] switch
+			var startingItems = lines[1][18..].Split(',', StringSplitOptions.TrimEntries).Select(s => T.Parse(s, provider));
+			var items = new Queue<T>(startingItems);
+			Func<T, T> operation = lines[2][23] switch
 			{
-				'*' => (int old) => old * (int.TryParse(lines[2][25..], out var i) ? i : old),
-				'+' => (int old) => old + (int.TryParse(lines[2][25..], out var i) ? i : old),
+				'*' => (T old) => old * (T.TryParse(lines[2].AsSpan(25), provider, out var i) ? i : old),
+				'+' => (T old) => old + (T.TryParse(lines[2].AsSpan(25), provider, out var i) ? i : old),
 				_ => throw new Exception()
 			}; ;
-			var divisibleBy = int.Parse(lines[3][21..]);
+			var divisibleBy = T.Parse(lines[3].AsSpan(21), provider);
 			var trueRoute = int.Parse(lines[4][29..]);
 			var falseRoute = int.Parse(lines[5][30..]);
 
 			return new(index, items, operation, divisibleBy, trueRoute, falseRoute);
 		}
 
-		public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Monkey result)
+		public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Monkey<T> result)
 		{
 			result = Parse(s!, provider);
 			return true;
