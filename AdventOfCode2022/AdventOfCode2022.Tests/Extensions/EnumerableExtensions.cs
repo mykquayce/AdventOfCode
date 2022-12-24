@@ -57,7 +57,12 @@ public static class EnumerableExtensions
 			}
 		}
 	}
+
 	public static T Product<T>(this IEnumerable<T> items)
 		where T : INumber<T>
 		=> items.Aggregate(seed: T.One, (product, next) => product * next);
+
+	public static IDictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> items)
+		where TKey : notnull
+		=> items.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 }
